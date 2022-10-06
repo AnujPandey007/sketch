@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import Canvas from '../components/Canvas';
 
 export default function Sketch({isAuth}) {
 
@@ -13,6 +13,8 @@ export default function Sketch({isAuth}) {
   }, [isAuth, navigate]);
 
   return (
-    <div>Sketch</div>
+    <div className='flex'>
+      <Canvas width={800} height={500} color={"black"}/>
+    </div>
   )
 }
