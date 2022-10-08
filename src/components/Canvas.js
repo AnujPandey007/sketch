@@ -13,9 +13,9 @@ const Canvas = ({
 
     function onDraw(ctx, point, prevPoint) {
         drawLine(prevPoint, point, ctx, color, 5);
-        console.log(point);
-        console.log(ctx);
-        console.log(prevPoint);
+        // console.log(point);
+        // console.log(ctx);
+        // console.log(prevPoint);
     }
 
     function drawLine(

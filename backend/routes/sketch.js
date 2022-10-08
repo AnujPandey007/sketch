@@ -5,13 +5,12 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/addSketch', async(req, res)=>{
-    try{
+    try {
+      console.log('Data: ', req.body.userId)
       const sketch = await sketchModal.create({
-        userId: req.body.userId,
-        questionData: req.body.questionData,
-        likes: req.body.likes,
-        isAnswered: req.body.isAnswered,
-        questionTag:req.body.questionTag
+        created_by: req.body.userId,
+        collaborator: [req.body.userId],
+        image: req.body.image
       });
       res.json(sketch);
     }catch(e){
@@ -22,7 +21,7 @@ router.post('/addSketch', async(req, res)=>{
 
 router.get('/getSketches', async(req, res)=>{
     try{
-      const sketch = await sketchModal.find().sort({questionTime: 'descending'});
+      const sketch = await sketchModal.find({ collaborator: { $in: req.body.userId } }).sort({ createdAt: 'descending' });
       //For an ascending sort, you can use "ascending".
       res.json(sketch);
     }catch(e){
@@ -45,11 +44,8 @@ router.put('/updateSketch/:id', async(req, res)=>{
     try{
       const sketch = await sketchModal.findByIdAndUpdate(
         req.params.id, {
-          userId: req.body.userId,
-          questionData: req.body.questionData,
-          likes: req.body.likes,
-          isAnswered: req.body.isAnswered,
-          answerId : req.body.answerId
+          $addToSet: { collaborator: req.body.userId },
+          image: req.body.image
         },
         {new: true},
       );
@@ -63,7 +59,7 @@ router.put('/updateSketch/:id', async(req, res)=>{
 router.delete('/deleteSketch/:id', async (req, res)=>{
     try{
       await sketchModal.findByIdAndDelete(req.params.id);
-      res.json("Deleted Successfully");
+      res.json({status: true});
     }catch(e){
       console.log(e.message);
       res.status(404).json(e.message);

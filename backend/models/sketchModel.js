@@ -1,26 +1,21 @@
 const mongoose = require('mongoose');
+const userSchema = require('./userModel')
 
 const sketchSchema = new mongoose.Schema({
-    userId: {
+    collaborator: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }],
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    image: {
         type: String,
         required: true
     },
-    sketchData: {
-        type: String,
-        required: true
-    },
-    answerId: {
-        type: String,
-        default: 0
-    },
-    isDone:{
-        type: Boolean,
-        default: false
-    },
-    sketchTime : { 
-        type : Date,
-        default : Date.now
-    }
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model("Sketch", sketchSchema);
