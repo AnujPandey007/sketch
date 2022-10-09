@@ -21,9 +21,9 @@ function App() {
     }
     setCustomAlert(alertObject);
 
-    setTimeout(() => {
-      setCustomAlert(null);
-    }, 1500);
+    // setTimeout(() => {
+    //   setCustomAlert(null);
+    // }, 1500);
   }
 
 

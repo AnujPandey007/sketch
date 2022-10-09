@@ -12,7 +12,7 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
     const {setUserData} = useUser();
 
     const handleEmail=(event) =>{
-        setEmail(event.target.value)
+        setEmail(event.target.value);
     }
     
     const handlePassword=(event) =>{
@@ -20,9 +20,10 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
     }
    
     const login = async()=>{
-    //  event.preventDefault();
-    
-        if(email.length!==0&&password.length!==0){
+        //  event.preventDefault();
+
+        const validEmail = new RegExp('^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$');
+        if(validEmail.test(email) && email.length!==0&&password.length!==0){
             setLoading(true);
         
             const loginApi="http://localhost:3000/auth/login";
@@ -59,7 +60,7 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
             }
             setLoading(false);
         }else{
-            setAlert("Please fill all details", "danger");
+            setAlert("Please fill all details correctly", "danger");
         }
     }
       

@@ -44,10 +44,10 @@ export default function Signup({isAuth, setIsAuth, setAlert}) {
 
   const register= async()=>{
     //  event.preventDefault();
-
+    const validEmail = new RegExp('^[a-zA-Z0-9._:$!%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$');
     if(password!==password2){
       setAlert("Password does not match", "danger");
-    }else if(firstName.length!==0&&lastName.length!==0&&email.length!==0&&password.length!==0&&password2.length!==0){
+    }else if(validEmail.test(email) && firstName.length!==0&&lastName.length!==0&&email.length!==0&&password.length!==0&&password2.length!==0){
       setLoading(true);
       
       const registerApi="http://localhost:3000/auth/register";
@@ -82,7 +82,7 @@ export default function Signup({isAuth, setIsAuth, setAlert}) {
     
         setLoading(false);
     }else{
-      setAlert("Please fill all details", "danger");
+      setAlert("Please fill all details correctly", "danger");
     }
   }
 
