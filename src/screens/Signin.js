@@ -1,22 +1,74 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {useUser} from "../context/UserContext";
 
 export default function Signin({isAuth, setIsAuth, setAlert}) {
 
     const navigate = useNavigate();
+    
+    const [email, setEmail]= React.useState("")
+    const [password, setPassword]= React.useState("")
+    const [loading, setLoading] = React.useState(false)
+    const {setUserData} = useUser();
+
+    const handleEmail=(event) =>{
+        setEmail(event.target.value)
+    }
+    
+    const handlePassword=(event) =>{
+        setPassword(event.target.value)
+    }
+   
+    const login = async()=>{
+    //  event.preventDefault();
+    
+        if(email.length!==0&&password.length!==0){
+            setLoading(true);
+        
+            const loginApi="http://localhost:3000/auth/login";
+        
+            const jsonData={
+                "userEmail":email,
+                "userPassword":password
+            };
+        
+            const requestOptions = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(jsonData)
+            };
+        
+            try{
+                const userData = await fetch(loginApi, requestOptions);
+                let jsonUserData = await userData.json();
+            if(jsonUserData==="Password is wrong"){
+                setAlert("Password is wrong", "danger");
+            }else if(jsonUserData==="Please login"){
+                setAlert("Please Signup", "danger");
+            }else{
+                // setAlert("Successfully Login", "success");
+                localStorage.setItem("isAuth", true);
+                localStorage.setItem("userData", JSON.stringify(jsonUserData));
+                setUserData(JSON.stringify(jsonUserData));
+                setIsAuth(true);
+                navigate("/home");
+            }
+            }catch(e){
+                setAlert("Failed to create an account", "danger");
+                console.log(e);
+            }
+            setLoading(false);
+        }else{
+            setAlert("Please fill all details", "danger");
+        }
+    }
+      
 
     React.useEffect(() => {
         if(isAuth){
             navigate('/home');
         }
     }, [isAuth, navigate]);
-
-    const login = () => {
-        setAlert("Successfully Login", "success");
-        localStorage.setItem("isAuth", true);
-        setIsAuth(true);
-        navigate("/home");
-    }
 
 
   return (
@@ -28,10 +80,10 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
 
             <div className="flex flex-col mt-7 w-80 gap-4 justify-center">
                 <div className="flex">
-                    <input type="email" className="bg-white border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Email" required/>
+                    <input type="email" onChange={handleEmail}  className="bg-white border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Email" required/>
                 </div>
                 <div className="flex">
-                    <input type="password" className="bg-white border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Password" required/>
+                    <input type="password" onChange={handlePassword}  className="bg-white border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Password" required/>
                 </div>
             </div>
 
@@ -39,9 +91,8 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
                 Forgot password?
             </div>
 
-
             <div className="flex w-80 justify-center">
-                <button type="submit" onClick={()=> login()} style={{backgroundColor:"#4F00C1"}} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm h-10 w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Log In</button>
+                <button type="submit" onClick={()=> login()} disabled={loading} style={{backgroundColor:"#4F00C1"}} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm h-10 w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Log In</button>
             </div>
 
             <div className="flex flex-row w-80 justify-center">

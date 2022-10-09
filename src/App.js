@@ -7,6 +7,7 @@ import Signin from './screens/Signin';
 import Signup from './screens/Signup';
 import Sketch from './screens/Sketch';
 import Alert from './components/Alert';
+import {UserProvider} from './context/UserContext';
 
 function App() {
 
@@ -27,7 +28,7 @@ function App() {
 
 
   return (
-    <>
+    <UserProvider>
       <Router>
         <Navbar isAuth={isAuth}/>
         <Alert customAlert={customAlert}/>
@@ -40,7 +41,7 @@ function App() {
           <Route path='/me' element={<Profile isAuth={isAuth} setIsAuth={setIsAuth}/>}/>
         </Routes>
       </Router>
-    </>
+    </UserProvider>
   );
 }
 

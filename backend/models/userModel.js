@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     userImage:{
         type: String,
         default: ""
+    },
+    lastSketchId: {
+        type: String,
+        default: ""
     }
 });
 
