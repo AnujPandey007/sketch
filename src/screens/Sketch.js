@@ -1,32 +1,48 @@
-import React, { useEffect, useRef } from 'react';
-
+import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
-import './../css/SketchCSS.module.css';
+import { useNavigate, useLocation} from 'react-router-dom';
+import {useUser} from "../context/UserContext";
+import down from "../assets/down.png";
 
-const Canvas = () => {
+const Canvas = ({isAuth}) => {
+    const {userData} = useUser();
+    const [showList, setShowList] = useState(true);
 
-    const { current: canvasDetails } = useRef({ color: 'green', socketUrl: '/' });
+    let location = useLocation();
+    const navigate = useNavigate();
 
-    const changeColor = (newColor) => {
-        canvasDetails.color = newColor;
+    const getColor = ()=> {
+        if (Object.keys(location.state.sketchData).length === 0) {
+            return "red";
+        }
+        const data = location.state.sketchData.collaborator.filter((item) => item.user === userData._id);
+        return data.length === 0 ? "red" : data[0].color
     }
 
-    useEffect(() => {
-      fetch('http://localhost:3000/sketches/getSketch/63410968f44d6f8b2b5f74ac', {
-        method: "GET",
-        headers: { 
-          'Content-Type': 'application/json'
+    const { current: canvasDetails } = useRef({ color: getColor(), socketUrl: '/' });
+
+
+    // const changeColor = (newColor) => {
+    //     canvasDetails.color = newColor;
+    // }
+
+    React.useEffect(() => {
+        if(!isAuth){
+            navigate('/');
         }
-      }).then((data)=>data.json()).then((response)=> {
-        const image = new Image()
+    }, [isAuth, navigate]);
+
+    useEffect(()=> {
+        if(location.state.isUpdate){
+            const image = new Image();
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
-            image.src = response.image;
+            image.src = location.state.sketchData.image;
             image.addEventListener('load', () => {
                 context.drawImage(image, 0, 0);
             });
-      })
-    }, [canvasDetails])
+        }
+    }, [location])
 
     useEffect(() => {
         console.log('client env', process.env.NODE_ENV)
@@ -136,37 +152,123 @@ const Canvas = () => {
     }, [canvasDetails])
 
     return (
-        <div className='canvas-wrapper'>
-            <div className='color-picker-wrapper'>
-                <input
-                    className='color-picker'
-                    type='color'
-                    defaultValue='#00FF00'
-                    onChange={(e) => changeColor(e.target.value)}
-                />
-                <button
-                  className='bg-red'
-                  onClick={async (e) => {
+        <>
+            <div className='flex absolute bottom-10 right-10 shadow-lg p-5 bg-black text-white'>
+            <button
+                onClick={async (e) => {
                     e && e.preventDefault();
                     const canvas = document.getElementById('canvas');
                     if (!canvasDetails.waiting) {
-                      const base64EncodedUrl = canvas.toDataURL('image/png')
-                      await fetch('http://localhost:3000/sketches/addSketch', {
-                        method: "POST",
-                        headers: { 
-                          'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                          image: base64EncodedUrl,
-                          userId: "633e613dee3dab9931f1a527"
-                        })
-                      })
+                        const base64EncodedUrl = canvas.toDataURL('image/png');
+                        if(location.state.isUpdate){
+                            //updateApi update image
+                            // console.log(base64EncodedUrl);
+                            await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                                method: "PUT",
+                                headers: { 
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    image: base64EncodedUrl
+                                })
+                            });
+                        }else{
+                            //addApi
+                            await fetch('http://localhost:3000/sketches/addSketch', {
+                                method: "POST",
+                                headers: { 
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    image: base64EncodedUrl,
+                                    userId: userData._id
+                                })
+                            });
+                        }
+                        navigate('/');
                     }
-                  }}
+                }}
                 >Save</button>
             </div>
-            <canvas className='canvas' id='canvas'></canvas>
-        </div>
+            <div className='flex absolute top-20 right-10 p-5 h-48 border border-black'>
+                <div className="flex flex-col">
+                    <div className="flex flex-row justify-between">
+                        <div>
+                            Users
+                        </div>
+                        <div>
+                            <button onClick={()=> {
+                                setShowList(!showList);
+                            }}>
+                                <img src={down} alt="..."/>
+                            </button>                  
+                        </div>
+                    </div>
+                    <div className="relative flex py-5 items-center">
+                        <div className="flex-grow border-t border-gray-400"></div>
+                    </div>
+                    {!showList && <div>
+                        Tap on Down Button to see the list
+                    </div>}
+                    {showList && location.state.users.length!==0 && <div className="overflow-scroll">
+                    {location.state.users.map((user)=>{
+                        return (
+                            <div key={user._id}>
+                                <div className='flex flex-row'>
+                                    <div className="flex mr-5"> {user.userFirstName} {user.userLastName} </div>
+                                    <div className='flex'>
+                                        <button onClick={async (event)=> {
+                                           event && event.preventDefault();
+                                            const isAlreadyCollaborator = location.state.sketchData.collaborator.filter((item) => {
+                                                console.log('ERW: ', item.user, user._id)
+                                                return item.user === user._id;
+                                            });
+
+                                            console.log(location.state.sketchData.collaborator);
+
+                                            if(isAlreadyCollaborator.length > 0){
+                                                console.log("isAlreadyCollaborator: true");
+                                            }else{
+                                                console.log("isAlreadyCollaborator: false");
+                                            }
+
+                                            // if (!canvasDetails.waiting) {
+                                            //     //updateApi update image
+                                            //     await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                                            //         method: "PUT",
+                                            //         headers: { 
+                                            //             'Content-Type': 'application/json'
+                                            //         },
+                                            //         body: JSON.stringify({
+                                            //             userId: user._id
+                                            //         })
+                                            //     });
+                                            // }
+
+                                            // navigate('/');
+                                        }}>Add Collaborator</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                    </div>}
+                </div>
+            </div>
+
+            <div className='canvas-wrapper'>
+                <div className='color-picker-wrapper'>
+                    {/* <input
+                        className='color-picker'
+                        type='color'
+                        defaultValue='#00FF00'
+                        onChange={(e) => changeColor(e.target.value)}
+                    /> */}
+                </div>
+                <canvas className='canvas' id='canvas'></canvas>
+            </div>
+        </>
+        
     )
 
 }

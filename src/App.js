@@ -37,6 +37,7 @@ function App() {
           <Route path='/' element={<Signin isAuth={isAuth} setIsAuth={setIsAuth} setAlert={setAlert}/>}/>
           <Route path='/register' element={<Signup isAuth={isAuth} setIsAuth={setIsAuth} setAlert={setAlert}/>}/>
           <Route path='/home' element={<Home isAuth={isAuth}/>}/>
+          <Route path='/sketch/:id' element={<Sketch isAuth={isAuth} />}/>
           <Route path='/sketch' element={<Sketch isAuth={isAuth} />}/>
           <Route path='/me' element={<Profile isAuth={isAuth} setIsAuth={setIsAuth}/>}/>
         </Routes>

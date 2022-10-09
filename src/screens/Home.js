@@ -1,12 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import styles from '../css/HomeCSS.module.css';
+import SketchTile from './SketchTile';
+import {useUser} from "../context/UserContext";
 
 export default function Home({isAuth}) {
 
   const [sketches, setSketches] = React.useState([]);
+  const [users, setUsers] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const {userData} = useUser();
 
   const navigate = useNavigate();
 
@@ -16,43 +19,50 @@ export default function Home({isAuth}) {
     }
   }, [isAuth, navigate]);
 
-  // React.useEffect(() => {
-  //   const getQuestions = async()=>{
-  //     let sketchesApi = `http://localhost:3000/sketches/getSketch/63410968f44d6f8b2b5f74ac`;
-  //     let sketchesData = await fetch(sketchesApi);
-  //     let jsonSketchesData = await sketchesData.json();
-  //     setSketches(jsonSketchesData);
-  //     setIsLoading(false)
-  //   }
-  //   getQuestions()
-  // },)
+  React.useEffect(() => {
+    const getSketches = async()=>{
+      let sketchesApi = `http://localhost:3000/sketches/getSketches/${userData._id}`;
+      let sketchesData = await fetch(sketchesApi);
+      let jsonSketchesData = await sketchesData.json();
+      setSketches(jsonSketchesData);
+    }
+    const getUsers = async()=>{
+      let usersApi = `http://localhost:3000/users/getUsers`;
+      let usersData = await fetch(usersApi);
+      let jsonUsersData = await usersData.json();
+      setUsers(jsonUsersData);
+      setIsLoading(false)
+    }
+    getSketches()
+    getUsers()
+  },[userData]);
 
-  const navigateToSketch = () =>{
-    navigate('/sketch');
+  const navigateToSketch = ()=> {
+    let data = {
+      state : {
+        sketchData : {},
+        isUpdate: false,
+        users: users
+      }
+    }
+    navigate(`/sketch`, data)
   }
 
-
-  // if(isLoading){
-  //   return ( <div className='text-center'>
-  //       <div className="spinner-border" role="status">
-  //         <span className="sr-only"></span>
-  //       </div>
-  //     </div>
-  //   )
-  // }
+  if(isLoading){
+    return (<div className='mb-20'>Loading</div>);
+  }
 
   return (
     <div>
-      {/* <div className='container'>
-        <div className={`${styles.fab}`}><Link type="button" to="/addSketches" className="btn btn-dark btn-sm shadow p-3 mb-5 rounded">Add Sketches</Link></div>
-        {sketches.length===0 && <div className="h2">Questions are not Available</div>}
-        {sketches.length!==0 && <div className="row row-cols-1">
+      <div className='container'>
+        <div className={`${styles.fab}`}><button onClick={navigateToSketch} type="button" className="btn btn-dark btn-sm shadow p-3 mb-5 rounded">Add Sketches</button></div>
+        {sketches.length===0 && <div className="h2">Sketches are not Available</div>}
+        {sketches.length!==0 && <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mx-10 mt-10">
           {sketches.map((e)=>{
-            return <div key={e._id}><QuestionTile questionData={e} ></QuestionTile></div>
+            return <div key={e._id}><SketchTile users={users} sketchData={e}/></div>
           })}
         </div>}
-      </div> */}
-      <button type="submit" onClick={()=> navigateToSketch()} style={{backgroundColor:"#4F00C1"}} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded text-sm h-10 w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Sketch</button>
+      </div>
     </div>
   )
 }
