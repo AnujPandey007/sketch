@@ -13,11 +13,16 @@ export default function Navbar({isAuth}) {
             <Link to="/">
                 <img src={logo} alt="..."/>
             </Link>
-          {isAuth && <Link to="/me">
-            <div className="w-6 h-6 mr-1">
-              <img src={userData.userImage} alt="Logo" height="35" width="35" className="d-inline-block rounded align-text-top"/>
-            </div>
-           </Link>}
+            {isAuth && <Link to="/me">
+              <div className='flex flex-row items-center'>
+                <div className="font-bold mr-3">
+                    {userData.userFirstName} {userData.userLastName}
+                </div>
+                <div className="w-6 h-6 mr-1">
+                  <img src={userData.userImage} alt="Logo" height="35" width="35" className="d-inline-block rounded align-text-top"/>
+                </div>
+              </div>
+            </Link>}
         </div>
     </div>
   );

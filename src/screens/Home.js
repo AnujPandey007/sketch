@@ -53,16 +53,16 @@ export default function Home({isAuth}) {
   }
 
   return (
-    <div>
+    <>
+      <div className={`${styles.fab}`}><button onClick={navigateToSketch} type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">Add Sketches</button></div>
       <div className='container'>
-        <div className={`${styles.fab}`}><button onClick={navigateToSketch} type="button" className="btn btn-dark btn-sm shadow p-3 mb-5 rounded">Add Sketches</button></div>
         {sketches.length===0 && <div className="h2">Sketches are not Available</div>}
-        {sketches.length!==0 && <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mx-10 mt-10">
+        {sketches.length!==0 && <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mx-10 mt-10">
           {sketches.map((e)=>{
             return <div key={e._id}><SketchTile users={users} sketchData={e}/></div>
           })}
         </div>}
       </div>
-    </div>
+    </>
   )
 }

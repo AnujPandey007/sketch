@@ -26,6 +26,64 @@ const Canvas = ({isAuth}) => {
     //     canvasDetails.color = newColor;
     // }
 
+    const addCollaborator = async(event, user)=>{
+        event && event.preventDefault();
+        const isAlreadyCollaborator = location.state.sketchData.collaborator.filter((item) => item.user === user._id);
+
+        // console.log(location.state.sketchData.collaborator);
+
+        if(isAlreadyCollaborator.length > 0){
+            alert("User is already a collaborator");
+        }else{
+            if (!canvasDetails.waiting) {
+                await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                    method: "PUT",
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user._id
+                    })
+                });
+            }
+            alert("User is added as collaborator");
+        }
+    }
+
+    const saveSketch = async(e)=>{
+        e && e.preventDefault();
+        const canvas = document.getElementById('canvas');
+        if (!canvasDetails.waiting) {
+            const base64EncodedUrl = canvas.toDataURL('image/png');
+            if(location.state.isUpdate){
+                //updateApi update image
+                // console.log(base64EncodedUrl);
+                await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                    method: "PUT",
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: base64EncodedUrl
+                    })
+                });
+            }else{
+                //addApi
+                await fetch('http://localhost:3000/sketches/addSketch', {
+                    method: "POST",
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: base64EncodedUrl,
+                        userId: userData._id
+                    })
+                });
+            }
+            navigate('/');
+        }
+    }
+
     React.useEffect(() => {
         if(!isAuth){
             navigate('/');
@@ -42,7 +100,7 @@ const Canvas = ({isAuth}) => {
                 context.drawImage(image, 0, 0);
             });
         }
-    }, [location])
+    }, [location]);
 
     useEffect(() => {
         console.log('client env', process.env.NODE_ENV)
@@ -149,57 +207,24 @@ const Canvas = ({isAuth}) => {
         canvas.removeEventListener("mouseup", mouseUpHandler);
         canvas.removeEventListener("dblclick", onSave);
     }
-    }, [canvasDetails])
+    }, [canvasDetails]);
 
     return (
         <>
-            <div className='flex absolute bottom-10 right-10 shadow-lg p-5 bg-black text-white'>
-            <button
-                onClick={async (e) => {
-                    e && e.preventDefault();
-                    const canvas = document.getElementById('canvas');
-                    if (!canvasDetails.waiting) {
-                        const base64EncodedUrl = canvas.toDataURL('image/png');
-                        if(location.state.isUpdate){
-                            //updateApi update image
-                            // console.log(base64EncodedUrl);
-                            await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
-                                method: "PUT",
-                                headers: { 
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    image: base64EncodedUrl
-                                })
-                            });
-                        }else{
-                            //addApi
-                            await fetch('http://localhost:3000/sketches/addSketch', {
-                                method: "POST",
-                                headers: { 
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    image: base64EncodedUrl,
-                                    userId: userData._id
-                                })
-                            });
-                        }
-                        navigate('/');
-                    }
-                }}
-                >Save</button>
+            <div className='flex absolute bottom-10 right-10'>
+                <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" onClick={(e)=>saveSketch(e)}>
+                    Save
+                </button>
             </div>
-            <div className='flex absolute top-20 right-10 p-5 h-48 border border-black'>
+
+            {(location.state.sketchData.created_by===userData._id || !location.state.sketchData.created_by) && <div className='flex absolute top-20 right-10 p-5 h-48 border border-black'>
                 <div className="flex flex-col">
                     <div className="flex flex-row justify-between">
                         <div>
                             Users
                         </div>
                         <div>
-                            <button onClick={()=> {
-                                setShowList(!showList);
-                            }}>
+                            <button onClick={()=> {setShowList(!showList)}}>
                                 <img src={down} alt="..."/>
                             </button>                  
                         </div>
@@ -211,50 +236,21 @@ const Canvas = ({isAuth}) => {
                         Tap on Down Button to see the list
                     </div>}
                     {showList && location.state.users.length!==0 && <div className="overflow-scroll">
-                    {location.state.users.map((user)=>{
-                        return (
-                            <div key={user._id}>
-                                <div className='flex flex-row'>
-                                    <div className="flex mr-5"> {user.userFirstName} {user.userLastName} </div>
-                                    <div className='flex'>
-                                        <button onClick={async (event)=> {
-                                           event && event.preventDefault();
-                                            const isAlreadyCollaborator = location.state.sketchData.collaborator.filter((item) => {
-                                                console.log('ERW: ', item.user, user._id)
-                                                return item.user === user._id;
-                                            });
-
-                                            console.log(location.state.sketchData.collaborator);
-
-                                            if(isAlreadyCollaborator.length > 0){
-                                                console.log("isAlreadyCollaborator: true");
-                                            }else{
-                                                console.log("isAlreadyCollaborator: false");
-                                            }
-
-                                            // if (!canvasDetails.waiting) {
-                                            //     //updateApi update image
-                                            //     await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
-                                            //         method: "PUT",
-                                            //         headers: { 
-                                            //             'Content-Type': 'application/json'
-                                            //         },
-                                            //         body: JSON.stringify({
-                                            //             userId: user._id
-                                            //         })
-                                            //     });
-                                            // }
-
-                                            // navigate('/');
-                                        }}>Add Collaborator</button>
+                        {location.state.users.map((user)=>{
+                            return (
+                                <div key={user._id} className="my-2">
+                                    <div className='flex flex-row'>
+                                        <div className="flex mr-5"> {user.userFirstName} {user.userLastName} </div>
+                                        <button onClick={(event)=>addCollaborator(event, user)} className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-2 border border-blue-500 hover:border-transparent rounded">
+                                            Add Collaborator
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })}
                     </div>}
                 </div>
-            </div>
+            </div>}
 
             <div className='canvas-wrapper'>
                 <div className='color-picker-wrapper'>
