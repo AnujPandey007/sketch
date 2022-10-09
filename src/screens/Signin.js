@@ -112,7 +112,7 @@ export default function Signin({isAuth, setIsAuth, setAlert}) {
             </div>
 
             <div className="w-72 justify-center">
-                <button className="w-full h-10 text-center py-3 my-3 border flex space-x-2 items-center justify-center border-slate-200 text-slate-700 hover:border-slate-400 hover:text-slate-900 hover:shadow transition duration-150">
+                <button onClick={()=> alert("Under maintenance")} className="w-full h-10 text-center py-3 my-3 border flex space-x-2 items-center justify-center border-slate-200 text-slate-700 hover:border-slate-400 hover:text-slate-900 hover:shadow transition duration-150">
                     <img src="https://www.svgrepo.com/show/355037/google.svg" className="w-6 h-6" alt=""/> 
                     <span>Log in with Google</span>
                 </button>
