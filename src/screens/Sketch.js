@@ -209,6 +209,8 @@ const Canvas = ({isAuth}) => {
     }
     }, [canvasDetails]);
 
+    let isCreator = (location.state.sketchData.created_by===userData._id || !location.state.sketchData.created_by);
+
     return (
         <>
             <div className='flex absolute bottom-10 right-10'>
@@ -217,7 +219,7 @@ const Canvas = ({isAuth}) => {
                 </button>
             </div>
 
-            {(location.state.sketchData.created_by===userData._id || !location.state.sketchData.created_by) && <div className='flex absolute top-20 right-10 p-5 h-48 border border-black'>
+            {isCreator && <div className='flex absolute top-20 right-10 p-5 h-48 border border-black'>
                 <div className="flex flex-col">
                     <div className="flex flex-row justify-between">
                         <div>

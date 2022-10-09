@@ -1,10 +1,22 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-// import {useUser} from "../context/UserContext";
+import {useUser} from "../context/UserContext";
+import { storage } from '../config/FirebaseConfig';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { v4 } from 'uuid';
 
 export default function Profile({isAuth, setIsAuth, setAlert}) {
   const navigate = useNavigate();
-  // const {setUserData, userData} = useUser();
+  const {setUserData, userData} = useUser();
+
+  const [loading, setLoading] = useState(false);
+  const [imageUpload, setImageUpload] = useState("");
+  let profileUrl = userData.userImage;
+  let prevProfileUrl = profileUrl;
+  
+  const handleImage = (event)=>{
+    setImageUpload(event.target.files[0]);
+  } 
 
   const signUserOut = ()=>{
     try{
@@ -14,6 +26,58 @@ export default function Profile({isAuth, setIsAuth, setAlert}) {
     }catch(e){
         console.log("error");
     }
+  }
+
+  const deleteImage = async() => {
+    if(imageUpload!=="" && prevProfileUrl!=="https://firebasestorage.googleapis.com/v0/b/questionaire-b0b15.appspot.com/o/images%2Fuser.png?alt=media&token=b2750c51-8569-4948-bf61-ef80ac7c8de2"){
+        const imageRef = ref(storage, prevProfileUrl);
+        await deleteObject(imageRef);
+    }
+  }
+
+  const uploadImage = async()=> {
+    if(imageUpload!==""){
+      try{
+        const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
+        const result = await uploadBytes(imageRef, imageUpload);
+        const imgUrl = await getDownloadURL(result.ref);
+        profileUrl = imgUrl;
+      }catch(e){
+        setAlert("Failed to update", "danger");
+        console.log(e);
+      }
+    }
+  }
+
+  const update = async()=>{
+    setLoading(true);
+    await uploadImage();
+
+    const updateApi=`http://localhost:3000/users/updateUser/${userData._id}`;
+
+    const jsonData={
+      "userImage": profileUrl
+    };
+
+    const requestOptions = {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(jsonData)
+    };
+
+    try{
+        const authData = await fetch(updateApi, requestOptions);
+        let jsonAuthData = await authData.json();
+        await deleteImage();
+        localStorage.setItem("userData", JSON.stringify(jsonAuthData));
+        setUserData(JSON.stringify(jsonAuthData));
+        setAlert("Successfully Updated", "success");
+        navigate('/');
+    }catch(e){
+        setAlert("Failed to update", "danger");
+        console.log(e);
+    }
+    setLoading(false);
   }
 
   React.useEffect(() => {
@@ -39,13 +103,13 @@ export default function Profile({isAuth, setIsAuth, setAlert}) {
                           Select a photo
                         </p>
                       </div>
-                    <input type="file" className="opacity-0" />
+                    <input type="file" className="opacity-0" accept="image/*" onChange={handleImage}/>
                   </label>
                 </div>
               </div>
               <div className="flex p-2 space-x-4">
                 <button className="px-4 py-2 text-white bg-red-500 rounded shadow-xl">Cannel</button>
-                <button className="px-4 py-2 text-white bg-green-500 rounded shadow-xl">Upload</button>
+                <button onClick={update} disabled={loading} className="px-4 py-2 text-white bg-green-500 rounded shadow-xl">Upload</button>
               </div>
             </div>
           </div>
