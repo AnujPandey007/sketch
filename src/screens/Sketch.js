@@ -36,7 +36,7 @@ const Canvas = ({isAuth}) => {
             alert("User is already a collaborator");
         }else{
             if (!canvasDetails.waiting) {
-                await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                await fetch(`https://sketch-app-backend.onrender.com/sketches/updateSketch/${location.state.sketchData._id}`, {
                     method: "PUT",
                     headers: { 
                         'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ const Canvas = ({isAuth}) => {
             if(location.state.isUpdate){
                 //updateApi update image
                 // console.log(base64EncodedUrl);
-                await fetch(`http://localhost:3000/sketches/updateSketch/${location.state.sketchData._id}`, {
+                await fetch(`https://sketch-app-backend.onrender.com/sketches/updateSketch/${location.state.sketchData._id}`, {
                     method: "PUT",
                     headers: { 
                         'Content-Type': 'application/json'
@@ -69,7 +69,7 @@ const Canvas = ({isAuth}) => {
                 });
             }else{
                 //addApi
-                await fetch('http://localhost:3000/sketches/addSketch', {
+                await fetch('https://sketch-app-backend.onrender.com/sketches/addSketch', {
                     method: "POST",
                     headers: { 
                         'Content-Type': 'application/json'

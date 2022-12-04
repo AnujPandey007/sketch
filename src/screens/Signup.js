@@ -50,7 +50,7 @@ export default function Signup({isAuth, setIsAuth, setAlert}) {
     }else if(validEmail.test(email) && firstName.length!==0&&lastName.length!==0&&email.length!==0&&password.length!==0&&password2.length!==0){
       setLoading(true);
       
-      const registerApi="http://localhost:3000/auth/register";
+      const registerApi="https://sketch-app-backend.onrender.com/auth/register";
     
       const jsonData={
         "userFirstName":firstName,
