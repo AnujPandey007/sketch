@@ -32,14 +32,14 @@ export default function Home({isAuth}) {
       if (!userData._id) {
         return;
       }
-      let sketchesApi = `https://sketch-app-backend.onrender.com/sketches/getSketches/${userData._id}`;
+      let sketchesApi = `http://localhost:3000/sketches/getSketches/${userData._id}`;
       let sketchesData = await fetch(sketchesApi);
       let jsonSketchesData = await sketchesData.json();
       setSketches(jsonSketchesData);
       getUsers();
     }
     const getUsers = async()=>{
-      let usersApi = `https://sketch-app-backend.onrender.com/users/getUsers`;
+      let usersApi = `http://localhost:3000/users/getUsers`;
       let usersData = await fetch(usersApi);
       let jsonUsersData = await usersData.json();
       setUsers(jsonUsersData);

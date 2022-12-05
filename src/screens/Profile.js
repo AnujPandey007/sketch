@@ -53,7 +53,7 @@ export default function Profile({isAuth, setIsAuth, setAlert}) {
     setLoading(true);
     await uploadImage();
 
-    const updateApi=`https://sketch-app-backend.onrender.com/users/updateUser/${userData._id}`;
+    const updateApi=`http://localhost:3000/users/updateUser/${userData._id}`;
 
     const jsonData={
       "userImage": profileUrl
